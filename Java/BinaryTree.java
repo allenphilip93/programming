@@ -1,26 +1,41 @@
-public class BinaryTree<T extends Number> {
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 
-    private class TreeNode {
+public class BinaryTree<T extends Number & Comparable<? super T>> {
+
+    class Node {
         T data;
-        TreeNode left;
-        TreeNode right;
-        public TreeNode(T data){
+        Node left;
+        Node right;
+        int Ltag, Rtag;
+        Node nextSibling;
+        public Node(T data){
             this.data = data;
+        }
+
+        public void print() {
+            System.out.println("Data : " + data + " | " + "Left : " + ((left != null && left.data != null) ? left.data.toString() : "null")
+            + " | " + "Left Tag : " + Ltag + " | " + "Right Tag : " + Rtag + " | " + "Right : " + ((right != null && right.data != null) ? right.data.toString() : "null"));
         }
     }
 
-    TreeNode root;
+    Node root;
 
     public void addNode(T elem) {
-        TreeNode node = new TreeNode(elem);
+        Node node = new Node(elem);
         if (root == null) {
             root = node;
         } else {
             // Level order add
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             while (queue.size > 0) {
-                TreeNode curr = queue.dequeue();
+                Node curr = queue.dequeue();
                 if (curr.left == null) {
                     curr.left = node;
                     break;
@@ -35,12 +50,36 @@ public class BinaryTree<T extends Number> {
         }
     }
 
+    public void addRoot(T elem) {
+        root = new Node(elem);
+    }
+
+    public void addLeftChild(Node node, T elem) {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else if (node.left != null) {
+            System.out.println("Node already has a left child!");
+        } else {
+            node.left = new Node(elem);
+        }
+    }
+
+    public void addRightChild(Node node, T elem) {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else if (node.right != null) {
+            System.out.println("Node already has a right child!");
+        } else {
+            node.right = new Node(elem);
+        }
+    }
+
     public void removeNode(T elem) {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
             // Level order delete
-            // QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            // QueueLinkedList<Node> queue = new QueueLinkedList<>();
             
         }
     }
@@ -49,32 +88,114 @@ public class BinaryTree<T extends Number> {
         root = null; // gc takes care of the rest
     }
 
+    public void printNode(Node root) {
+        int maxLevel = maxLevel(root);
+
+        printNodeInternal(Collections.singletonList(root), 1, maxLevel);
+    }
+
+    private void printNodeInternal(List<Node> nodes, int level, int maxLevel) {
+        if (nodes.isEmpty() || isAllElementsNull(nodes))
+            return;
+
+        int floor = maxLevel - level;
+        int endgeLines = (int) Math.pow(2, (Math.max(floor - 1, 0)));
+        int firstSpaces = (int) Math.pow(2, (floor)) - 1;
+        int betweenSpaces = (int) Math.pow(2, (floor + 1)) - 1;
+
+        printWhitespaces(firstSpaces);
+
+        List<Node> newNodes = new ArrayList<Node>();
+        for (Node node : nodes) {
+            if (node != null) {
+                System.out.print(node.data);
+                newNodes.add(node.left);
+                newNodes.add(node.right);
+            } else {
+                newNodes.add(null);
+                newNodes.add(null);
+                System.out.print(" ");
+            }
+
+            printWhitespaces(betweenSpaces);
+        }
+        System.out.println("");
+
+        for (int i = 1; i <= endgeLines; i++) {
+            for (int j = 0; j < nodes.size(); j++) {
+                printWhitespaces(firstSpaces - i);
+                if (nodes.get(j) == null) {
+                    printWhitespaces(endgeLines + endgeLines + i + 1);
+                    continue;
+                }
+
+                if (nodes.get(j).left != null)
+                    System.out.print("/");
+                else
+                    printWhitespaces(1);
+
+                printWhitespaces(i + i - 1);
+
+                if (nodes.get(j).right != null)
+                    System.out.print("\\");
+                else
+                    printWhitespaces(1);
+
+                printWhitespaces(endgeLines + endgeLines - i);
+            }
+
+            System.out.println("");
+        }
+
+        printNodeInternal(newNodes, level + 1, maxLevel);
+    }
+
+    private void printWhitespaces(int count) {
+        for (int i = 0; i < count; i++)
+            System.out.print(" ");
+    }
+
+    private int maxLevel(Node node) {
+        if (node == null)
+            return 0;
+        return Math.max(maxLevel(node.left), maxLevel(node.right)) + 1;
+    }
+
+    private <K> boolean isAllElementsNull(List<K> list) {
+        for (Object object : list) {
+            if (object != null)
+                return false;
+        }
+        return true;
+    }
+
     public void printTree() {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
-            queue.enqueue(root);
-            int level = 0;
-            while (queue.size > 0) {
-                String s = "";
-                int size = queue.size;
-                for (int idx=0; idx < size; idx++) {
-                    TreeNode node = queue.dequeue();
-                    if (node != null) {
-                        s = s + node.data.toString() + " ";
-                    } else {
-                        s = s + "null" + " ";
-                        continue;
-                    }
-                    // if (node.left != null)
-                    queue.enqueue(node.left);
-                    // if (node.right != null)
-                    queue.enqueue(node.right);
-                }
-                System.out.println("Level " + level + " : " + s);
-                level++;
-            }            
+            // QueueLinkedList<Node> queue = new QueueLinkedList<>();
+            // queue.enqueue(root);
+            // int level = 0;
+            // while (queue.size > 0) {
+            //     String s = "";
+            //     int size = queue.size;
+            //     for (int idx=0; idx < size; idx++) {
+            //         Node node = queue.dequeue();
+            //         if (node != null) {
+            //             s = s + node.data.toString() + " ";
+            //         } else {
+            //             s = s + "null" + " ";
+            //             continue;
+            //         }
+            //         // if (node.left != null)
+            //         queue.enqueue(node.left);
+            //         // if (node.right != null)
+            //         queue.enqueue(node.right);
+            //     }
+            //     System.out.println("Level " + level + " : " + s);
+            //     level++;
+            // }            
+            printNode(root);
         }
     }
 
@@ -91,7 +212,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private int getTreeSizeRecursion(TreeNode node) {
+    public int getTreeSizeRecursion(Node node) {
         if (node == null) {
             return 0;
         } else {
@@ -99,13 +220,13 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private int getTreeSizeLevelOrder(TreeNode node) {
-        QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+    public int getTreeSizeLevelOrder(Node node) {
+        QueueLinkedList<Node> queue = new QueueLinkedList<>();
         int size = 0;
         if (node != null) {
             queue.enqueue(node);
             while (queue.size > 0) {
-                TreeNode curr = queue.dequeue();
+                Node curr = queue.dequeue();
                 size++;
                 if (curr.left != null)
                     queue.enqueue(curr.left);
@@ -128,7 +249,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private boolean findNodeRecurse(TreeNode node, T elem) {
+    private boolean findNodeRecurse(Node node, T elem) {
         if (node == null) {
             return false;
         } else if (node.data.intValue() == elem.intValue()) {
@@ -140,13 +261,13 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private boolean findNodeLevelOrder(TreeNode node, T elem) {
+    private boolean findNodeLevelOrder(Node node, T elem) {
         boolean isFound = false;
         if (node != null) {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(node);
             while (queue.size > 0 && !isFound) {
-                TreeNode curr = queue.dequeue();
+                Node curr = queue.dequeue();
                 if (curr.data.intValue() == elem.intValue()) {
                     isFound = true;
                 } else {
@@ -160,11 +281,11 @@ public class BinaryTree<T extends Number> {
         return isFound;
     }
 
-    private TreeNode getNode(T elem) {
-        TreeNode curr = null;
+    public Node getNode(T elem) {
+        Node curr = null;
         boolean isFound = false;
         if (root != null) {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             while (queue.size > 0 && !isFound) {
                 curr = queue.dequeue();
@@ -187,8 +308,8 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            TreeNode curr = root;
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            Node curr = root;
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             while (queue.size > 0) {
                 int size = queue.size;
@@ -212,7 +333,7 @@ public class BinaryTree<T extends Number> {
         System.out.println("Number of full nodes : " + count);
     }
 
-    private int countFullNodes(TreeNode node) {
+    private int countFullNodes(Node node) {
         if (node == null)
             return 0;
         if ((node.left != null && node.right != null) 
@@ -230,7 +351,7 @@ public class BinaryTree<T extends Number> {
         System.out.println("Number of half nodes : " + count);
     }
 
-    private int countHalfNodes(TreeNode node) {
+    private int countHalfNodes(Node node) {
         if (node == null || (node.left == null && node.right == null))
             return 0;
         if (node.left == null || node.right == null)
@@ -252,7 +373,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private boolean checkSameStructure(TreeNode n1, TreeNode n2) {
+    private boolean checkSameStructure(Node n1, Node n2) {
         if (n1 == null || n2 == null) {
             return (n1 == null && n2 == null);
         }
@@ -275,7 +396,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private boolean checkSameTree(TreeNode n1, TreeNode n2) {
+    private boolean checkSameTree(Node n1, Node n2) {
         if (n1 == null || n2 == null) {
             return (n1 == null && n2 == null);
         }
@@ -298,7 +419,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private boolean checkMirrorTree(TreeNode n1, TreeNode n2) {
+    private boolean checkMirrorTree(Node n1, Node n2) {
         if (n1 == null || n2 == null) {
             return (n1 == null && n2 == null);
         }
@@ -318,11 +439,11 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private void mirrorTreeRecurse(TreeNode node) {
+    private void mirrorTreeRecurse(Node node) {
         if (node == null) {
             return;
         }
-        TreeNode temp = node.right;
+        Node temp = node.right;
         node.right = node.left;
         node.left = temp;
         mirrorTreeRecurse(node.left);
@@ -346,7 +467,7 @@ public class BinaryTree<T extends Number> {
     }
 
     // With and without recursion
-    private int getNodeDepthRecursion(TreeNode root, TreeNode node) {
+    private int getNodeDepthRecursion(Node root, Node node) {
         if (root == node) {
             return 0;
         } else if (root == null) {
@@ -365,7 +486,7 @@ public class BinaryTree<T extends Number> {
     }
 
     // With and without recursion
-    private int getNodeHeightRecursion(TreeNode node) {
+    private int getNodeHeightRecursion(Node node) {
         if (node == null) {
             return -1;
         } else {
@@ -373,14 +494,14 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private int getNodeDepthLevelOrder(TreeNode root, TreeNode node) {
+    private int getNodeDepthLevelOrder(Node root, Node node) {
         int startLevel = 0;
         int endLevel = 0;
         int currLevel = 0;
         if (root != null) {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
-            TreeNode curr;
+            Node curr;
             boolean isFound = false;
             while (queue.size > 0 && !isFound) {
                 int size = queue.size;
@@ -404,14 +525,14 @@ public class BinaryTree<T extends Number> {
         return endLevel - startLevel;
     }
 
-    private int getNodeHeightLevelOrder(TreeNode node) {
+    private int getNodeHeightLevelOrder(Node node) {
         int startLevel = 0;
         int endLevel = 0;
         int currLevel = 0;
         if (root != null) {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(node);
-            TreeNode curr;
+            Node curr;
             while (queue.size > 0) {
                 int size = queue.size;
                 for (int idx=0; idx < size; idx++) {
@@ -430,7 +551,7 @@ public class BinaryTree<T extends Number> {
 
     // With and without recursion
     public void getNodeDepth(T elem) {
-        TreeNode node = getNode(elem);
+        Node node = getNode(elem);
         if (node != null) {
             int depth = getNodeDepthRecursion(root, node);
             System.out.println("Depth of node " + elem.toString() + " by recursion : " + depth);
@@ -443,7 +564,7 @@ public class BinaryTree<T extends Number> {
 
     // With and without recursion
     public void getNodeHeight(T elem) {
-        TreeNode node = getNode(elem);
+        Node node = getNode(elem);
         if (node != null) {
             int height = getNodeHeightRecursion(node);
             System.out.println("Height of node " + elem.toString() + " by recursion : " + height);
@@ -468,13 +589,13 @@ public class BinaryTree<T extends Number> {
     public boolean isCompleteTree() {
         boolean isCompleteTree = true;
         if (root != null) {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             boolean nullFound = false;
             while (queue.size > 0) {
                 int size = queue.size;
                 for (int idx=0; idx < size; idx++) {
-                    TreeNode node = queue.dequeue();
+                    Node node = queue.dequeue();
                     if (node != null) {
                         queue.enqueue(node.left);
                         queue.enqueue(node.right);
@@ -507,7 +628,7 @@ public class BinaryTree<T extends Number> {
         } 
     }
 
-    private String reversePreOrderTraverse(TreeNode node) {
+    private String reversePreOrderTraverse(Node node) {
         if (node == null) {
             return "";
         }
@@ -524,7 +645,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private String preOrderTraverse(TreeNode node) {
+    private String preOrderTraverse(Node node) {
         if (node == null) {
             return "";
         }
@@ -536,11 +657,11 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            LinkedListStack.Stack<TreeNode> stack = new LinkedListStack.Stack<>();
+            LinkedListStack.Stack<Node> stack = new LinkedListStack.Stack<>();
             stack.push(root);
             String s = "";
             while (stack.size > 0) {
-                TreeNode node = stack.pop();
+                Node node = stack.pop();
                 s = s + node.data.toString() + " ";
                 if (node.right != null)
                     stack.push(node.right);
@@ -555,8 +676,8 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            LinkedListStack.Stack<TreeNode> stack = new LinkedListStack.Stack<>();
-            TreeNode node = root;
+            LinkedListStack.Stack<Node> stack = new LinkedListStack.Stack<>();
+            Node node = root;
             String s = "";
             while (true) {
                 // Add left sub tree node
@@ -584,7 +705,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private String inOrderTraverse(TreeNode node) {
+    public String inOrderTraverse(Node node) {
         if (node == null) {
             return "";
         }
@@ -595,8 +716,8 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            LinkedListStack.Stack<TreeNode> stack = new LinkedListStack.Stack<>();
-            TreeNode node = root;
+            LinkedListStack.Stack<Node> stack = new LinkedListStack.Stack<>();
+            Node node = root;
             String s = "";
             while (true) {
                 // Add left sub tree node
@@ -624,7 +745,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private String postOrderTraverse(TreeNode node) {
+    private String postOrderTraverse(Node node) {
         if (node == null) {
             return "";
         }
@@ -636,21 +757,26 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            LinkedListStack.Stack<TreeNode> stack = new LinkedListStack.Stack<>();
+            LinkedListStack.Stack<Node> stack = new LinkedListStack.Stack<>();
             stack.push(root);
             String s = "";
-            TreeNode prev = null;
+            Node prev = null;
             while (stack.size > 0) {
-                TreeNode curr = stack.peek();
+                Node curr = stack.peek();
+                // if the execution is going downwards
                 if (prev == null || prev.left == curr || prev.right == curr) {
                     if (curr.left != null)
                         stack.push(curr.left);
                     else if (curr.right != null)
                         stack.push(curr.right);
-                } else if (curr.left == prev) {
+                } 
+                // if the execution is going upwards
+                else if (curr.left == prev) {
                     if (curr.right != null)
                         stack.push(curr.right);
-                } else {
+                }
+                // if curr and prev at the same point
+                else {
                     s = s + curr.data.toString() + " ";
                     stack.pop();
                 }
@@ -664,8 +790,8 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            LinkedListStack.Stack<TreeNode> stack = new LinkedListStack.Stack<>();
-            TreeNode node = root;
+            LinkedListStack.Stack<Node> stack = new LinkedListStack.Stack<>();
+            Node node = root;
             String s = "";
             while (true) {
                 // Add left sub tree node
@@ -692,13 +818,13 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             String s = "";
             while (queue.size > 0) {
                 int size = queue.size;
                 for (int idx=0; idx < size; idx++) {
-                    TreeNode node = queue.dequeue();
+                    Node node = queue.dequeue();
                     s = s + node.data.toString() + " ";
                     if (node.left != null)
                         queue.enqueue(node.left);
@@ -714,10 +840,10 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            LinkedListStack.Stack<TreeNode> stack = new LinkedListStack.Stack<>();
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            LinkedListStack.Stack<Node> stack = new LinkedListStack.Stack<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
-            TreeNode node;
+            Node node;
             while (queue.size > 0) {
                 node = queue.dequeue();
                 stack.push(node);
@@ -739,15 +865,15 @@ public class BinaryTree<T extends Number> {
         if (root == null) {
             System.out.println("Tree is empty!");
         } else {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             int level = 0;
             while (queue.size > 0) {
                 int size = queue.size;
                 String s = "";
-                LinkedListStack.Stack<TreeNode> stack = new LinkedListStack.Stack<>();
+                LinkedListStack.Stack<Node> stack = new LinkedListStack.Stack<>();
                 for (int idx=0; idx < size; idx++) {
-                    TreeNode node = queue.dequeue();
+                    Node node = queue.dequeue();
                     if (level%2 == 1) {
                         stack.push(node);
                     } else {
@@ -776,7 +902,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private String printLeavesRecurse(TreeNode node) {
+    private String printLeavesRecurse(Node node) {
         if (node == null)
             return "";
         if (node.left == null && node.right == null) 
@@ -792,7 +918,7 @@ public class BinaryTree<T extends Number> {
         System.out.println("Count leaf node level order : " + count);
     }
 
-    private int countLeafNodesRecurse(TreeNode node) {
+    private int countLeafNodesRecurse(Node node) {
         if (node == null) {
             return 0;
         } else if (node.left == null && node.right == null) {
@@ -806,10 +932,10 @@ public class BinaryTree<T extends Number> {
         int count = -1;
         if (root != null) {
             count = 0;
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             while (queue.size > 0) {
-                TreeNode curr = queue.dequeue();
+                Node curr = queue.dequeue();
                 if (curr.left == null && curr.right == null) {
                     count++;
                 }
@@ -834,7 +960,7 @@ public class BinaryTree<T extends Number> {
         }
     }
 
-    private int findMaxRecurse(TreeNode root, int max) {
+    private int findMaxRecurse(Node root, int max) {
         if (root == null) {
             return max;
         } else if (root.data.intValue() > max) {
@@ -845,16 +971,16 @@ public class BinaryTree<T extends Number> {
         return max;
     }
 
-    private int findMaxLevelOrder(TreeNode root) {
+    private int findMaxLevelOrder(Node root) {
         if (root == null) {
             System.out.println("Tree is empty!");
             return -1;
         } else {
-            QueueLinkedList<TreeNode> queue = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
             queue.enqueue(root);
             int max = -1;
             while (queue.size > 0) {
-                TreeNode node = queue.dequeue();
+                Node node = queue.dequeue();
                 if (node.data.intValue() > max)
                     max = node.data.intValue();
                 if (node.left != null)
@@ -877,7 +1003,7 @@ public class BinaryTree<T extends Number> {
 
     int diameter=0;
 
-    public int findDiameterRecurse(TreeNode node) {
+    public int findDiameterRecurse(Node node) {
         if (node == null || (node.left == null && node.right == null)) {
             return 0;
         } else {
@@ -895,7 +1021,7 @@ public class BinaryTree<T extends Number> {
         rootToLeafPath(root, stack);
     }
 
-    private void rootToLeafPath(TreeNode node, LinkedListStack.Stack<T> stack) {
+    private void rootToLeafPath(Node node, LinkedListStack.Stack<T> stack) {
         if (node == null) {
             return;
         } else if (node.left == null && node.right == null) {
@@ -922,7 +1048,7 @@ public class BinaryTree<T extends Number> {
         System.out.println("------------------------------");
     }
 
-    private boolean checkPathSum(TreeNode node, int sum, LinkedListStack.Stack<T> stack) {
+    private boolean checkPathSum(Node node, int sum, LinkedListStack.Stack<T> stack) {
         if (sum == 0) {
             // System.out.println("Yes, path found");
             stack.print();
@@ -941,20 +1067,20 @@ public class BinaryTree<T extends Number> {
     }
 
     public void findLeastCommonAncestor(T elem1, T elem2) {
-        // TreeNode n1 = getNode(elem1);
-        // TreeNode n2 = getNode(elem2);
-        TreeNode node = findLCA(root, elem1, elem2);
+        // Node n1 = getNode(elem1);
+        // Node n2 = getNode(elem2);
+        Node node = findLCA(root, elem1, elem2);
         System.out.println("Least Common Ancestor : " + node.data.toString());
     }
 
-    private TreeNode findLCA(TreeNode node, T elem1, T elem2) {
+    private Node findLCA(Node node, T elem1, T elem2) {
         if (node == null) {
             return null;
         } else if (node.data.intValue() == elem1.intValue() || node.data.intValue() == elem2.intValue()) {
             return node;
         } else {
-            TreeNode left = findLCA(node.left, elem1, elem2);
-            TreeNode right = findLCA(node.right, elem1, elem2);
+            Node left = findLCA(node.left, elem1, elem2);
+            Node right = findLCA(node.right, elem1, elem2);
             if (left != null && right != null) {
                 return node;
             } else {
@@ -963,25 +1089,627 @@ public class BinaryTree<T extends Number> {
         }
     }
 
+    public Node buildTreePreOrderAlt(List<T> inOrder, List<T> preOrder) {
+        if (preOrder.size() == 0 || inOrder.size() == 0)
+            return null;
+        T elem = preOrder.get(0);
+        preOrder.remove(0);
+        Node node = new Node(elem);
+        
+        int idx = findElem(inOrder, elem);
+        List<T> leftInorderTree = (idx > 0) ? new ArrayList<>(inOrder.subList(0, idx)) : new ArrayList<>();
+        List<T> rightInorderTree = (idx < inOrder.size() - 1) ? new ArrayList<>(inOrder.subList(idx+1, inOrder.size())) : new ArrayList<>();
+        
+        List<T> leftPreorderTree = (leftInorderTree.size() == 0) ? new ArrayList<>() : new ArrayList<>(preOrder.subList(0, leftInorderTree.size()));
+        List<T> rightPreorderTree = (rightInorderTree.size() == 0) ? new ArrayList<>() : new ArrayList<>(preOrder.subList(leftInorderTree.size(), preOrder.size()));
+
+        node.left = buildTreePreOrderAlt(leftInorderTree, leftPreorderTree);
+        node.right = buildTreePreOrderAlt(rightInorderTree, rightPreorderTree);
+        return node;
+    }
+
+    public Node buildTreePostOrderAlt(List<T> inOrder, List<T> preOrder) {
+        if (preOrder.size() == 0 || inOrder.size() == 0)
+            return null;
+        T elem = preOrder.get(preOrder.size()-1);
+        preOrder.remove(preOrder.size()-1);
+        Node node = new Node(elem);
+        
+        int idx = findElem(inOrder, elem);
+        List<T> leftInorderTree = (idx > 0) ? new ArrayList<>(inOrder.subList(0, idx)) : new ArrayList<>();
+        List<T> rightInorderTree = (idx < inOrder.size() - 1) ? new ArrayList<>(inOrder.subList(idx+1, inOrder.size())) : new ArrayList<>();
+        
+        List<T> leftPostorderTree = (leftInorderTree.size() == 0) ? new ArrayList<>() : new ArrayList<>(preOrder.subList(0, leftInorderTree.size()));
+        List<T> rightPostorderTree = (rightInorderTree.size() == 0) ? new ArrayList<>() : new ArrayList<>(preOrder.subList(leftInorderTree.size(), preOrder.size()));
+
+        node.left = buildTreePostOrderAlt(leftInorderTree, leftPostorderTree);
+        node.right = buildTreePostOrderAlt(rightInorderTree, rightPostorderTree);
+        return node;
+    }
+
+    public Node buildTreePreOrder(List<T> inOrder, List<T> preOrder) {
+        if (preOrder.size() == 0 || inOrder.size() == 0)
+            return null;
+        T elem = preOrder.get(0);
+        preOrder.remove(0);
+        Node node = new Node(elem);
+        
+        int idx = findElem(inOrder, elem);
+        List<T> leftTree = (idx > 0) ? inOrder.subList(0, idx) : new ArrayList<>();
+        List<T> rightTree = (idx < inOrder.size() - 1) ? inOrder.subList(idx+1, inOrder.size()) : new ArrayList<>();
+        
+        node.left = buildTreePreOrder(leftTree, preOrder);
+        node.right = buildTreePreOrder(rightTree, preOrder);
+        return node;
+    }
+
+    private int findElem(List<T> list, T elem) {
+        if (list.size() > 0) {
+            int idx = 0;
+            for (T node : list) {
+                if (node.intValue() == elem.intValue())
+                    return idx;
+                idx++;
+            }
+        } 
+        return -1;
+    }
+
+    public void maxPathSum() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            int max = maxPathSum(root);
+            System.out.println("Max path sum is " + max);
+        }
+    }
+
+    private int maxPathSum(Node node) {
+        if (node == null)
+            return 0;
+        return Math.max(node.data.intValue() + maxPathSum(node.left), node.data.intValue() + maxPathSum(node.right));
+    }
+
+    public void findMaxPathSum() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            LinkedListStack.Stack<T> stack = new LinkedListStack.Stack<>();
+            findMaxPathSum(root, maxPathSum(root), stack);
+        }
+    }
+    
+    private boolean findMaxPathSum(Node node, int sum, LinkedListStack.Stack<T> stack) {
+        if (sum == 0) {
+            // sum is zero so path found
+            stack.print();
+            return true;
+        }
+        if (node == null || sum < 0) {
+            return false;
+        }
+        stack.push(node.data);
+        boolean res= findMaxPathSum(node.left, sum - node.data.intValue(), stack) | findMaxPathSum(node.right, sum - node.data.intValue(), stack);
+        stack.pop();
+        return res;
+    }
+
+    public void findMinDepth() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            int minDepth = findMinDepth(root);
+            System.out.println("Min depth is : " + minDepth);
+        }
+    }
+
+    private int findMinDepth(Node node) {
+        if (node == null) {
+            return 0;
+        } else {
+            return Math.min(1 + findMinDepth(node.left), 1 + findMinDepth(node.right));
+        }
+    }
+
+    public void findAllMinDepthNodes() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            QueueLinkedList<Integer> queue = new QueueLinkedList<>();
+            findAllMinDepthNodes(root, findMinDepth(root), queue);
+            System.out.println("Min Depth Leaves : ");
+            queue.print();
+        }
+    }
+
+    private void findAllMinDepthNodes(Node node, int depth, QueueLinkedList<Integer> queue) {
+        if (node == null) {
+            return;
+        } else if (node.left == null && node.right == null && depth == 1) {
+            queue.enqueue(node.data.intValue());
+            return;
+        }
+        findAllMinDepthNodes(node.left, depth - 1, queue);
+        findAllMinDepthNodes(node.right, depth - 1, queue);
+    }
+
+    public void flattenTree() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            flattenTree(root);
+        }
+    }
+
+    // TODO Alternative way
+    private Node flattenTreeAlt(Node node) {
+        if (node == null)
+            return null;
+        Node left = flattenTreeAlt(node.left);
+        Node right = flattenTreeAlt(node.right);
+        return null;
+    }
+
+    protected Node flattenTree(Node node) {
+        if (node != null) {
+            Node left = null, right = null;
+            if (node.left == null && node.right != null) {
+                return node;
+            } if (node.left != null) {
+                left = flattenTree(node.left);
+            }
+            if (node.right != null) {
+                right = flattenTree(node.right);
+                if (left != null) {
+                    Node leftTop = left;
+                    while (left.right != null)
+                        left = left.right;
+                    left.right = right;
+                    left = leftTop;
+                } else {
+                    left = right;
+                }
+            }
+            node.left = null;
+            node.right = left;
+        }
+        return node;
+    }
+
+    public void findLastElement() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            T elem = findLastElement(root);
+            System.out.println("Last element is : " + elem.toString());
+        }
+    }
+
+    private T findLastElement(Node node) {
+        if (node == null)
+            return null;
+        if (node.left == null && node.right == null) {
+            return node.data;
+        }
+        T elem = findLastElement(node.right);
+        if (elem == null)
+            elem = findLastElement(node.left);
+        return elem;
+    }
+
+    public void serialize() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
+            queue.enqueue(root);
+            T lastElem = findLastElement(root);
+            String s = "";
+            boolean isEnd = false;
+            while (queue.size > 0 && !isEnd) {
+                int size = queue.size;
+                for (int idx=0; idx < size; idx++) {
+                    Node curr = queue.dequeue();
+                    if (curr == null) {
+                        s = s + "null" + " ";
+                    }   else {
+                        s = s + curr.data + " ";
+                        if (curr.data.intValue() == lastElem.intValue()) {
+                            isEnd = true;
+                            break;
+                        }
+                    }
+                    queue.enqueue((curr == null) ? null : curr.left);
+                    queue.enqueue((curr == null) ? null : curr.right);
+                }
+            }
+            System.out.println("Serialized binary tree is : " + s);
+        }
+    }
+
+    public void deserialize(T[] arr) {
+        QueueLinkedList<Node> queue = new QueueLinkedList<>();
+        root = new Node(arr[0]);
+        Node curr = root;
+        for (int idx=1; idx < arr.length; idx++) {
+            if (curr == null || arr[idx] == null) {
+                queue.enqueue(null);
+                if (idx%2 == 0)
+                    curr = queue.dequeue();
+            } else if (curr.left == null && idx%2 == 1 && arr[idx] != null) {
+                curr.left = new Node(arr[idx]);
+                queue.enqueue(curr.left);
+            } else if (curr.right == null && idx%2 == 0 && arr[idx] != null) {
+                curr.right = new Node(arr[idx]);
+                queue.enqueue(curr.right);
+                curr = queue.dequeue();
+            }
+        }
+    }
+
+    public void connectSiblings() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
+            queue.enqueue(root);
+            Node curr = null, prev = null;
+            while (queue.size > 0) {
+                int size = queue.size;
+                for (int idx=0; idx < size; idx++) {
+                    prev = curr;
+                    curr = queue.dequeue();
+                    if (prev != null)
+                        prev.nextSibling = curr;
+                    if (curr.left != null)
+                        queue.enqueue(curr.left);
+                    if (curr.right != null)
+                        queue.enqueue(curr.right);
+                }
+            }
+        }
+    }
+
+    public void siblingLevelOrder() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            Node node = root;
+            String s = "";
+            while (node != null) {
+                s = s + node.data + " ";
+                node = node.nextSibling;
+            }
+            System.out.println("Sibling Level Order : " + s);
+        }
+    }
+
+    int maxHeight = 0;
+    String view = "";
+    public void allViews() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            maxHeight = 0;
+            view = "";
+            leftView(root, 0);
+            System.out.println("Left view of the tree : " + view);
+            maxHeight = 0;
+            view = "";
+            rightView(root, 0);
+            System.out.println("Right view of the tree : " + view);
+            Map<Integer, T> map = new TreeMap<>();
+            topView(root, 0, map);
+            System.out.println("Top view of the tree : " + Arrays.toString(map.values().toArray()));
+            map = new TreeMap<>();
+            bottomView(root, 0, map);
+            System.out.println("Bottom view of the tree : " + Arrays.toString(map.values().toArray()));
+        }
+    }
+
+    private int leftView(Node node, int height) {
+        if (node == null)
+            return height;
+        if (height >= maxHeight) {
+            view = view + node.data + " ";
+            maxHeight = height + 1;
+        }
+        return Math.max(leftView(node.left, height+1), leftView(node.right, height+1));
+    }
+
+    private int rightView(Node node, int height) {
+        if (node == null)
+            return height;
+        if (height == maxHeight) {
+            view = view + node.data + " ";
+            maxHeight++;
+        }
+        return Math.max(rightView(node.right, height+1), rightView(node.left, height+1));
+    }
+
+    private void topView(Node node, int distance, Map<Integer, T> map) {
+        if (node == null)
+            return;
+        if (!map.containsKey(distance)) {
+            map.put(distance, node.data);
+        }
+        topView(node.left, distance - 1, map);
+        topView(node.right, distance + 1, map);
+    }
+
+    private void bottomView(Node node, int distance, Map<Integer, T> map) {
+        if (node == null)
+            return;
+        map.put(distance, node.data);
+        bottomView(node.left, distance-1, map);
+        bottomView(node.right, distance+1, map);
+    }
+
+    
+    public void verticalTraversal() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            Map<Integer, QueueLinkedList<T>> map = new TreeMap<>();
+            QueueLinkedList<Integer> dist = new QueueLinkedList<>();
+            QueueLinkedList<Node> queue = new QueueLinkedList<>();
+            queue.enqueue(root);
+            dist.enqueue(0);
+            while (queue.size > 0 && dist.size > 0) {
+                Node curr = queue.dequeue();
+                int currDist = dist.dequeue();
+                if (curr.left != null) {
+                    queue.enqueue(curr.left);
+                    dist.enqueue(currDist - 1);
+                }
+                if (curr.right != null) {
+                    queue.enqueue(curr.right);
+                    dist.enqueue(currDist + 1);
+                }
+                QueueLinkedList<T> mapQueue = null;
+                if (map.containsKey(currDist)) {
+                    mapQueue = map.get(currDist);
+                } else {
+                    mapQueue = new QueueLinkedList<>();
+                }
+                mapQueue.enqueue(curr.data);
+                map.put(currDist, mapQueue);
+            }
+            System.out.println("Vertical Order Traversal : ");
+            for (QueueLinkedList<T> mapQueue : map.values()) {
+                mapQueue.print();
+            }
+        }
+    }
+    
+    // Downside here is that the order gets messed up sometimes, 
+    // like when the left half branches extend to the right side
+    public void verticalTraversalAlt() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            Map<Integer, LinkedList<T>> map = new TreeMap<>();
+            verticalTraversal(root, 0, map);
+            System.out.println("Vertical Order Traversal:");
+            for (LinkedList<T> ll : map.values()) {
+                ll.reverse();
+                String s = "";
+                while (ll.head != null) {
+                    s = s + ll.head.data + " ";
+                    ll.head = ll.head.next;
+                } 
+                System.out.println(s);
+            }
+        }
+    }
+
+    private void verticalTraversal(Node node, int distance, Map<Integer, LinkedList<T>> map) {
+        if (node == null)
+            return;
+        if (map.containsKey(distance)) {
+            LinkedList<T> ll = map.get(distance);
+            ll.add(node.data);
+        } else {
+            LinkedList<T> ll = new LinkedList<>();
+            ll.add(node.data);
+            map.put(distance, ll);
+        }
+        verticalTraversal(node.left, distance-1, map);
+        verticalTraversal(node.right, distance+1, map);
+    }
+
+    // Inorder without stack/recursion
+    public void morrisInorder() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            Node curr = root;
+            String s = "";
+            while (curr != null) {
+                if (curr.left == null) {
+                    s = s + curr.data + " ";
+                    curr = curr.right;
+                } else {
+                    Node last = curr.left;
+                    while (last.right != null && last.right != curr)
+                        last = last.right;
+                    if (last.right == null) {
+                        last.right = curr;
+                        curr = curr.left;
+                    } else {
+                        last.right = null;
+                        s = s + curr.data + " ";
+                        curr = curr.right;
+                    }
+                    
+                }
+            }
+            System.out.println("Morris Inorder : " + s);
+        }
+    }
+
+    // Preorder without stack/recursion
+    public void morrisPreorder() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            Node curr = root;
+            String s = "";
+            while (curr != null) {
+                if (curr.left == null) {
+                    s = s + curr.data + " ";
+                    curr = curr.right;
+                } else {
+                    Node last = curr.left;
+                    while (last.right != null && last.right != curr)
+                        last = last.right;
+                    if (last.right == null) {
+                        last.right = curr;
+                        s = s + curr.data + " ";
+                        curr = curr.left;
+                    } else {
+                        curr = curr.right;
+                        last.right = null;
+                    }
+                }
+            }
+            System.out.println("Morris Preorder : " + s);
+        }
+    }
+
+    public void morrisPostorder() {
+        if (root == null) {
+            System.out.println("Tree is empty!");
+        } else {
+            // Node curr = root;
+            String s = "";
+            // ensures all descendants of root that are right-children
+            //  (arrived at only by "recurring to right") get inner-threaded
+            final Node fakeNode = new Node(null);    // prefer not to give data, but construction requires it as primitive
+            fakeNode.left = root;
+
+            Node curOuter = fakeNode;
+            while (curOuter != null) {    // in addition to termination condition, also prevents fakeNode printing
+                if (curOuter.left != null) {
+                    final Node curOuterLeft = curOuter.left;
+
+                    // Find in-order predecessor of curOuter
+                    Node curOuterInOrderPred = curOuterLeft;
+                    while (curOuterInOrderPred.right != null && curOuterInOrderPred.right != curOuter) {
+                        curOuterInOrderPred = curOuterInOrderPred.right;
+                    }
+
+                    if (curOuterInOrderPred.right == null) {
+                        // [Outer-] Thread curOuterInOrderPred to curOuter
+                        curOuterInOrderPred.right = curOuter;
+
+                        // "Recur" on left
+                        curOuter = curOuterLeft;
+
+                    } else {    // curOuterInOrderPred already [outer-] threaded to curOuter
+                                //  -> [coincidentally] therefore curOuterLeft's left subtree is done processing
+                        // Prep for [inner] threading (which hasn't ever been done yet here)...
+                        Node curInner = curOuterLeft;
+                        Node curInnerNext = curInner.right;
+                        // [Inner-] Thread curOuterLeft [immediately backwards] to curOuter [its parent]
+                        curOuterLeft.right = curOuter;
+                        // [Inner-] Thread the same [immediately backwards] for all curLeft descendants
+                        //  that are right-children (arrived at only by "recurring" to right)
+                        while (curInnerNext != curOuter) {
+                            // Advance [inner] Node refs down 1 level (to the right)
+                            final Node backThreadPrev = curInner;
+                            curInner = curInnerNext;
+                            curInnerNext = curInnerNext.right;
+                            // Thread immediately backwards
+                            curInner.right = backThreadPrev;
+                        }
+
+                        // curInner, and all of its ancestors up to curOuterLeft,
+                        //  are now indeed back-threaded to each's parent
+                        // Print them in that order until curOuter
+                        while (curInner != curOuter) {
+                            /*
+                                -> VISIT
+                            */
+                            s = s + curInner.data + " ";
+
+                            // Move up one level
+                            curInner = curInner.right;
+                        }
+
+                        // "Recur" on right
+                        curOuter = curOuter.right;
+                    }
+
+                } else {
+                    // "Recur" on right
+                    curOuter = curOuter.right;
+                }
+            }
+            System.out.println("Morris Postorder : " + s);
+        }
+    }
+
     public static void main(String[] args) {
         BinaryTree<Integer> binaryTree = new BinaryTree<>();
-        binaryTree.addNode(1);
-        binaryTree.addNode(2);
-        binaryTree.addNode(3);
-        binaryTree.addNode(4);
-        binaryTree.addNode(5);
-        binaryTree.addNode(6);
-        binaryTree.addNode(7);
-        binaryTree.addNode(8);
+        // Generate tree from inorder & preorder (D)
+        // Generate tree from inorder & postorder (D)
+        // Serialize and deserialize from binary array (D)
+        // Max path sum (D)
+
+        // binaryTree.root = binaryTree.buildTreePreOrderAlt(new ArrayList<>(Arrays.asList(4, 2, 5, 1, 6, 3, 7)), new ArrayList<>(Arrays.asList(1, 2, 4, 5, 3, 6, 7)));
+        // binaryTree.root = binaryTree.buildTreePostOrderAlt(new ArrayList<>(Arrays.asList(4, 2, 5, 1, 6, 3, 7)), new ArrayList<>(Arrays.asList(4, 5, 2, 6, 7, 3, 1)));
+        // binaryTree.root = binaryTree.buildTreePreOrderAlt(new ArrayList<>(Arrays.asList(4, 2, 5, 1, 3)), new ArrayList<>(Arrays.asList(1, 2, 4, 5, 3)));
+        
+        // binaryTree.addNode(1);
+        // binaryTree.addNode(2);
+        // binaryTree.addNode(3);
+        // binaryTree.addNode(4);
+        // binaryTree.addNode(5);
+        // binaryTree.addNode(6);
+        // binaryTree.serialize();
+        // binaryTree.printTree();
+        // binaryTree.mirrorTree();
+        // binaryTree.flattenTree();
+        // binaryTree.serialize();
+        // binaryTree.deserialize(new Integer[]{1, 2, 3, null, 5, null, 7, 8, null, 9, 10, 11, null, 12});
+        // binaryTree.deserialize(new Integer[]{1, 2, 3, null, 2, 4, 7, 8, null, 3, null, 11, null, null, 12});
+        binaryTree.deserialize(new Integer[]{1, 2, 3, null, 5, null, null, null, null, 6, 7});
         binaryTree.printTree();
-        binaryTree.preOrderTraverse();
-        binaryTree.stackPreOrder();
-        binaryTree.stackPreOrderAlt();
+        binaryTree.morrisInorder();
         binaryTree.inOrderTraverse();
-        binaryTree.stackInOrder();
-        binaryTree.postOrderTraverse();
-        binaryTree.stackPostOrder();
-        binaryTree.stackPostOrderAlt();
+        binaryTree.morrisPreorder();
+        binaryTree.preOrderTraverse();
+        binaryTree.morrisPostorder();
+        // binaryTree.postOrderTraverse();
+        // binaryTree.allViews();
+        // binaryTree.verticalTraversal();
+        // binaryTree.connectSiblings();
+        // binaryTree.siblingLevelOrder();
+        // binaryTree.serialize();
+        // binaryTree.addNode(7);
+        // binaryTree.printTree();
+        // binaryTree.addNode(8);
+        // binaryTree.flattenTree();
+        // binaryTree.printTree();
+        // binaryTree.findLastElement();
+        
+        // binaryTree.printTree();
+        // binaryTree.findMinDepth();
+        // binaryTree.findAllMinDepthNodes();
+        // Print nodes at dist k from root (isn't that just level order by level ??)
+        // binaryTree.printTree();
+        // binaryTree.maxPathSum();
+        // binaryTree.findMaxPathSum();
+        // binaryTree.printTree();
+        // binaryTree.preOrderTraverse();
+        // binaryTree.stackPreOrder();
+        // binaryTree.stackPreOrderAlt();
+        // binaryTree.inOrderTraverse();
+        // binaryTree.stackInOrder();
+        // binaryTree.postOrderTraverse();
+        // binaryTree.stackPostOrder();
+        // binaryTree.stackPostOrderAlt();
 
 
         // binaryTree.mirrorTree();
