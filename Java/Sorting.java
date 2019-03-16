@@ -12,7 +12,7 @@ public class Sorting<T extends Number & Comparable<? super T>> {
      * Num Swaps : N^2/2
      * Worst Case : O(n^2)
      * Best Case : O(n)
-     * Stable : Yes 
+     * Stable : Yes
      */
     public void bubbleSort(T[] array) {
         boolean hasSwaps = true;
@@ -35,7 +35,7 @@ public class Sorting<T extends Number & Comparable<? super T>> {
      * Num Swaps : N
      * Worst Case : O(n^2)
      * Best Case : O(n^2)
-     * Stable : Yes 
+     * Stable : Yes
      */
     public void selectionSort(T[] array) {
         for (int outerIdx = 0; outerIdx < array.length; outerIdx++) {
@@ -53,13 +53,13 @@ public class Sorting<T extends Number & Comparable<? super T>> {
         }
         System.out.println("Selection sorted array : " + Arrays.toString(array));
     }
-    
+
     /**
      * Num Comparisons : N^2/2
      * Num Shifts : N^2
      * Worst Case : O(n^2)
      * Best Case : O(n)
-     * Stable : Yes 
+     * Stable : Yes
      */
     public void insertionSort(T[] array) {
         for (int outerIdx = 0; outerIdx < array.length; outerIdx++) {
@@ -67,7 +67,7 @@ public class Sorting<T extends Number & Comparable<? super T>> {
             T insertElem = array[insertIdx];
             for (int innerIdx = outerIdx-1; innerIdx >= 0; innerIdx--) {
                 if (array[innerIdx].compareTo(insertElem) > 0) {
-                    array[innerIdx+1] = array[innerIdx]; 
+                    array[innerIdx+1] = array[innerIdx];
                     insertIdx = innerIdx;
                 } else {
                     break;
@@ -163,13 +163,13 @@ public class Sorting<T extends Number & Comparable<? super T>> {
         quickSort(array, pivot + 1, endIdx);
     }
 
-    private void swap(T[] array, int index1, int index2) {
+    public void swap(T[] array, int index1, int index2) {
         T elem = array[index1];
         array[index1] = array[index2];
         array[index2] = elem;
     }
 
-    private void swap(Integer[] array, int index1, int index2) {
+    public void swap(Integer[] array, int index1, int index2) {
         Integer elem = array[index1];
         array[index1] = array[index2];
         array[index2] = elem;
@@ -204,7 +204,7 @@ public class Sorting<T extends Number & Comparable<? super T>> {
 
     public void countRepetitions(T[] array, int[] reps) {
         for (int index=0; index < array.length; index++) {
-            reps[array[index].intValue()]++; 
+            reps[array[index].intValue()]++;
         }
         for (int index=0; index < reps.length; index++) {
             System.out.println("Element : " + index + " | Reps : " + reps[index]);
@@ -289,6 +289,7 @@ public class Sorting<T extends Number & Comparable<? super T>> {
             System.out.println("No three elements add up to " + sum);
     }
 
+    // Check if more than n/2 occur in an unsorted array in logn time
     public void hasMajority(T[] array) {
         int mid = array.length/2 + array.length%2;
         T elem = array[mid];
@@ -357,11 +358,11 @@ public class Sorting<T extends Number & Comparable<? super T>> {
     }
 
     /*  If its like only 2 duplicates present
-        - We can adding up 1,2,.. N and subtract from sum of elems in array, 
-          similarly do pdt of all elems / N! to get two equations in two 
+        - We can adding up 1,2,.. N and subtract from sum of elems in array,
+          similarly do pdt of all elems / N! to get two equations in two
           variables - Solves in O(1) space and O(n) time
         - Alternatively we can use XOR of 1,2,.. N and all the elements in array
-          to get X xor Y, then we can find the kth but they differ and repeat the 
+          to get X xor Y, then we can find the kth but they differ and repeat the
           process to find X and Y individually
         - Simplest approach is by modifying the array, which is done below
     */
@@ -394,7 +395,7 @@ public class Sorting<T extends Number & Comparable<? super T>> {
     public void mergeInplace(T[] arr1, T[] arr2) {
 
     }
-    
+
     public void countFrequencies(Integer[] array) {
         int n = array.length;
         for (int idx=0; idx < n; idx++) {

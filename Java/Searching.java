@@ -2,9 +2,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 public class Searching<T extends Number & Comparable<? super T>> extends Sorting<T> {
-    
+
     public void firstRepeatedElement(Integer[] array) {
         Set<Integer> set = new HashSet<>();
         int min = -1;
@@ -17,7 +18,7 @@ public class Searching<T extends Number & Comparable<? super T>> extends Sorting
         }
         if (min == -1)
             System.out.println("No element has been repeated!");
-        else 
+        else
             System.out.println("First repeated element : " + array[min]);
     }
 
@@ -292,7 +293,7 @@ public class Searching<T extends Number & Comparable<? super T>> extends Sorting
             return -1;
         }
         int mid = (front + rear) >>> 1;
-        if (array[mid] == elem) { 
+        if (array[mid] == elem) {
             return mid;
         }
         int slope = getSlope(array, mid);
@@ -302,7 +303,7 @@ public class Searching<T extends Number & Comparable<? super T>> extends Sorting
             if (elem < array[mid]) {
                 res = bitonicSearch(array, elem, front, mid-1);
                 if (res != -1) return res;
-            } 
+            }
             if (elem > array[mid] || res == -1) {
                 return bitonicSearch(array, elem, mid+1, rear);
             }
@@ -375,17 +376,227 @@ public class Searching<T extends Number & Comparable<? super T>> extends Sorting
         System.out.println("Majority element : " + majority);
     }
 
+    // one element has more than n/2 appearances, find it
+    public void findStrictMajority(Integer[] array) {
+      // Boyer Moore counting algorithm
+      int majelem = -1, count = 0;
+      for (int index=0; index < array.length; index++) {
+        if (count == 0) {
+          majelem = array[index];
+          count = 1;
+        } else if (array[index] == majelem) {
+          count++;
+        } else if (array[index] != majelem) {
+          count--;
+        }
+      }
+      // We need to verify if the elem is indeed the majority
+      count = 0;
+      for (int index=0; index<array.length; index++){
+        if (array[index] == majelem)
+          count++;
+      }
+      if (count > array.length/2) {
+        System.out.println("Majority Element : " + majelem);
+      } else {
+        System.out.println("No majority element present!");
+      }
+    }
+
+    public void findLocalMinima(Integer[] array) {
+      int index = findLocalMinima(array, 0, array.length-1);
+      System.out.println("Array : " + Arrays.toString(array));
+      if (index == -1)
+        System.out.println("Local minima not found!");
+      else
+        System.out.println("Local minima of value " + array[index] + " found at index " + index);
+    }
+
+    private int findLocalMinima(Integer[] array, int start, int end) {
+      int mid = (start + end) >>> 1;
+      if (start > end)
+        return -1;
+      if (mid == 0 || mid == array.length-1 || (array[mid] < array[mid+1] && array[mid] < array[mid-1])) {
+        return mid;
+      }
+      if (array[mid] > array[mid-1]) {
+        return findLocalMinima(array, start, mid-1);
+      }
+      return findLocalMinima(array, mid+1, end);
+    }
+
+    public void findInSortedArray(Integer[][] array, Integer elem) {
+      x = -1; y = -1;
+      findInSortedArray(array, elem, array[0].length-1, 0, array.length, array[0].length);
+      if (x == -1 || y == -1)
+        System.out.println("Element of value " + elem + " was not found in the array");
+      else
+        System.out.println("Element of value " + elem + " was found at the (" + x + ", " + y + ")" );
+    }
+
+    int x = -1, y = -1;
+    private void findInSortedArray(Integer[][] array, Integer elem, int row, int col, int maxRow, int maxCol) {
+      // System.out.println("COL : " + col + " ROW : " + row + " CORNER : " + array[row][col]);
+      if (row < 0 || col >= maxCol)
+        return;
+      int corner = array[row][col];
+      if (corner == elem) {
+        x = row;
+        y = col;
+      } else if (corner < elem) {
+        findInSortedArray(array, elem, row, col+1, maxRow, maxCol);
+      } else {
+        findInSortedArray(array, elem, row-1, col, maxRow, maxCol);
+      }
+    }
+
+    public void findRowMaxOnes(Integer[][] array) {
+      int rowMax = 0;
+      int count = 0, maxcount = 0;
+      int x = 0, y = 0;
+      while (x < array.length && y < array.length) {
+        // System.out.println("X : " + x + " Y : " + y + " VAL : " + array[x][y]);
+        if (array[x][y] == 1) {
+          count++;
+          if (y == array.length-1) {
+            maxcount = count;
+            rowMax = x;
+            break;
+          }
+          y++;
+        } else if (array[x][y] == 0) {
+          if (count > maxcount) {
+            maxcount = count;
+            rowMax = x;
+          }
+          if (x == array.length-1)
+            break;
+          x++;
+        }
+
+      }
+      System.out.println("Row with a maximum of " + maxcount + " ones is " + rowMax);
+    }
+
+    // Similar to dutch national flag problem
+    public void separateEvenOddNums(Integer[] array) {
+      Integer firstOddIdx = 0, evenIdx = 0;
+      while (firstOddIdx < array.length && evenIdx < array.length) {
+        if (array[firstOddIdx]%2 == 0) {
+          firstOddIdx++;
+        } else if (array[evenIdx]%2 == 1) {
+          evenIdx++;
+        } else if (firstOddIdx < evenIdx) {
+          swap(array, firstOddIdx, evenIdx);
+        } else {
+          evenIdx++;
+        }
+      }
+      System.out.println("Separated Array : " + Arrays.toString(array));
+    }
+
+    public void separateBinaries(Integer[] array) {
+      int start = 0, end = array.length-1;
+      while (start < end) {
+        if (array[start] == 0) {
+          start++;
+        } else if (array[end] == 1) {
+          end--;
+        } else {
+          array[start] = 0;
+          array[end] = 1;
+          start++;
+          end--;
+        }
+      }
+      System.out.println("Separated Array : " + Arrays.toString(array));
+    }
+
+    public void findMaximumDifference(Integer[] array) {
+      int minIdx = 0, maxIdx = 1, maxSum = 0;
+      while (maxIdx < array.length) {
+        int sum = array[maxIdx] - array[minIdx];
+        if (sum > maxSum) {
+          maxSum = sum;
+        }
+        if (array[maxIdx] >= array[minIdx]) {
+          maxIdx++;
+        } else {
+          minIdx = maxIdx;
+          maxIdx++;
+        }
+      }
+      System.out.println("Max Difference : " + maxSum);
+    }
+
+    public void findMaximumIndexDifference(Integer[] array) {
+      Integer[] LMin = new Integer[array.length];
+      Integer[] RMax = new Integer[array.length];
+      int min = 0, max = array.length-1;
+      for(int index=0; index < array.length; index++) {
+        if (array[index] >= array[min]) {
+          LMin[index] = min;
+        } else {
+          min = index;
+          LMin[index] = min;
+        }
+      }
+      for(int index=max; index >= 0; index--) {
+        if (array[index] <= array[max]) {
+          RMax[index] = max;
+        } else {
+          max = index;
+          RMax[index] = max;
+        }
+      }
+      System.out.println("MIN : " + Arrays.toString(LMin));
+      System.out.println("MAX : " + Arrays.toString(RMax));
+      int start = -1, end = -1, maxdiff = -1;
+      for (int index=0; index < array.length; index++) {
+        int diff = RMax[index] - LMin[index];
+        if (diff > maxdiff) {
+          maxdiff = diff;
+          start = LMin[index];
+          end = RMax[index];
+        }
+      }
+      System.out.println("Maximum index difference is between (" + start + ", " + end + ")");
+    }
+
+    public void findNumTrailingZeros(Integer num) {
+      int count = 0;
+      for (int index=5; num/index > 0; index*=5) {
+        count = count + (num/index);
+      }
+      System.out.println("Num of trailing zeros : " + count);
+    }
+
+
+
     public static void main(String[] args) {
         Searching<Integer> searcher = new Searching<>();
-        // Integer[] array = new Integer[] {3, 2, 4, 3, 4, 2, 6, 4, 6, 4, 1};    
-        // Integer[] array = new Integer[] {3, 5, 4, 7, 8, 9, 1, 2, 6, 10};    
+        // Integer[] array = new Integer[] {3, 2, 4, 3, 4, 2, 6, 4, 6, 4, 1};
+        // Integer[] array = new Integer[] {3, 5, 4, 7, 8, 9, 6, 2, 1, 10};
+        Integer[] array = new Integer[] {3, 2, 10, 1, 4, 8, 7};
         // Integer[] array = new Integer[] {1, 60, -10, 70, 80, -85, 2};
         // Integer[] array = new Integer[] {-60, -25, 7, 80, 99, 60, 12, 0, -27};
         // Integer[] array = new Integer[] {10};
-        // Integer[] array = new Integer[] {4, 5, 6, 7, 8, 1, 2, 3};
-        Integer[] array = new Integer[] {1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8};
+        // Integer[] array = new Integer[] {9,7,2,8,5,6,3,4};
+        // Integer[] array = new Integer[] {1, 4, 1, 6, 1, 1, 1, 6, 6};
+        // Integer[] array = new Integer[] {1, 0, 1, 0, 1, 1, 1, 0, 0};
+        // Integer[] array = new Integer[] {1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8};
         // Integer[] array = new Integer[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
-        
+        // Integer[][] array = new Integer[][]{{10, 20, 30, 40},
+        //                                     {15, 25, 35, 45},
+        //                                     {27, 29, 37, 48},
+        //                                     {32, 33, 39, 50}};
+        // Integer[][] array = new Integer[][]{{1, 1, 1, 1, 0, 0},
+        //                                     {1, 0, 0, 0, 0, 0},
+        //                                     {1, 1, 1, 1, 1, 0},
+        //                                     {1, 1, 1, 0, 0, 0},
+        //                                     {1, 1, 1, 1, 1, 0},
+        //                                     {1, 1, 0, 0, 0, 0}};
+        // Integer[][] array = new Integer[][]{{0,0,0}, {0,0,0}, {0,0,0}};
         // searcher.firstRepeatedElement(array);
         // searcher.findMissingNumber(array);
         // searcher.findOddOccurringNum(array);
@@ -400,5 +611,15 @@ public class Searching<T extends Number & Comparable<? super T>> extends Sorting
         // searcher.searchRotatedArrayRecursion(array, 6);
         // searcher.bitonicSearch(array, 99);
         // searcher.findOccurenceRange(array, 8);
+        // searcher.findMajority(array);
+        // searcher.findStrictMajority(array);
+        // searcher.findLocalMinima(array);
+        // searcher.findInSortedArray(array, 10);
+        // searcher.findRowMaxOnes(array);
+        // searcher.separateEvenOddNums(array);
+        // searcher.separateBinaries(array);
+        // searcher.findMaximumDifference(array);
+        // searcher.findNumTrailingZeros(10);
+        searcher.findMaximumIndexDifference(array);
     }
 }
