@@ -535,32 +535,38 @@ public class Searching<T extends Number & Comparable<? super T>> extends Sorting
       int min = 0, max = array.length-1;
       for(int index=0; index < array.length; index++) {
         if (array[index] >= array[min]) {
-          LMin[index] = min;
+          LMin[index] = array[min];
         } else {
           min = index;
-          LMin[index] = min;
+          LMin[index] = array[min];
         }
       }
       for(int index=max; index >= 0; index--) {
         if (array[index] <= array[max]) {
-          RMax[index] = max;
+          RMax[index] = array[max];
         } else {
           max = index;
-          RMax[index] = max;
+          RMax[index] = array[max];
         }
       }
       System.out.println("MIN : " + Arrays.toString(LMin));
       System.out.println("MAX : " + Arrays.toString(RMax));
-      int start = -1, end = -1, maxdiff = -1;
-      for (int index=0; index < array.length; index++) {
-        int diff = RMax[index] - LMin[index];
-        if (diff > maxdiff) {
-          maxdiff = diff;
-          start = LMin[index];
-          end = RMax[index];
+      int start = 0, end = 0, maxdiff = 0, x = -1, y = -1;
+      while (end < array.length && start < array.length) {
+        System.out.println("START : " + start + " END : " + end);
+        int diff = end - start;
+        if (LMin[start] <= RMax[end]) {
+          if (diff > maxdiff) {
+            maxdiff = diff;
+            x = start;
+            y = end;
+          }
+          end++;
+        } else {
+            start++;
         }
       }
-      System.out.println("Maximum index difference is between (" + start + ", " + end + ")");
+      System.out.println("Maximum index difference is between (" + x + ", " + y + ")");
     }
 
     public void findNumTrailingZeros(Integer num) {
@@ -577,7 +583,7 @@ public class Searching<T extends Number & Comparable<? super T>> extends Sorting
         Searching<Integer> searcher = new Searching<>();
         // Integer[] array = new Integer[] {3, 2, 4, 3, 4, 2, 6, 4, 6, 4, 1};
         // Integer[] array = new Integer[] {3, 5, 4, 7, 8, 9, 6, 2, 1, 10};
-        Integer[] array = new Integer[] {3, 2, 10, 1, 4, 8, 7};
+        Integer[] array = new Integer[] {8, 2, 10, 1, 4, 8, 7};
         // Integer[] array = new Integer[] {1, 60, -10, 70, 80, -85, 2};
         // Integer[] array = new Integer[] {-60, -25, 7, 80, 99, 60, 12, 0, -27};
         // Integer[] array = new Integer[] {10};

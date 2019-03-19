@@ -61,6 +61,24 @@ public class BinarySearchTree<T extends Number & Comparable<? super T>> extends 
         return findNode(node, elem);
     }
 
+    public T removeLargestNode() {
+        Node node = root, parent = null;
+        T elem = null;
+        while (node.right != null) {
+            parent = node;
+            node = node.right;
+        }
+        elem = node.data;
+        if (node == root) {
+            root = node.left;
+        } else if (parent.right.left == null) {
+            parent.right = null;
+        } else {
+            parent.right = parent.right.left;
+        }
+        return elem;
+    }
+
     public void checkIfBST() {
         if (root == null) {
             System.out.println("Tree is empty!");
