@@ -1,6 +1,12 @@
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Separate chaining hash table
+ * 
+ * @param <T>
+ * @param <V>
+ */
 public class HashTable<T, V> {
 
     private class Node {
