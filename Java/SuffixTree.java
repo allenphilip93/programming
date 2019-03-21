@@ -1,5 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class SuffixTree {
 
@@ -21,6 +23,10 @@ public class SuffixTree {
     }
 
     public void addText(String text) {
+      addText(text, '$');
+    }
+
+    public void addText(String text, Character ender) {
         for (int outer_index=0; outer_index < text.length(); outer_index++) {
             Node curr = root;
             for (int index=outer_index; index < text.length(); index++) {
@@ -30,13 +36,13 @@ public class SuffixTree {
                 }
                 curr = curr.children.get(c);
             }
-            curr.children.put('$', new Node('$'));
+            curr.children.put(ender, new Node(ender));
         }
         maxdepth = Math.max(maxdepth, text.length());
     }
 
     public void print(Node node, String s) {
-        if (node.data == '$') {
+        if (node.data == '$' || node.data == '#') {
             System.out.println("Pattern : " + s);
         } else {
             for (Character c : node.children.keySet()) {
@@ -65,11 +71,57 @@ public class SuffixTree {
         }
     }
 
+    public void findLongestCommonSubstring(String t1, String t2) {
+      root = new Node('&');
+      addText(t1, '$');
+      addText(t2, '#');
+      maxStr = "";
+      findLCS(root, "");
+      System.out.println("Longest Common Substring : " + maxStr);
+    }
+
+    String maxStr = "";
+    private Set<Character> findLCS(Node node, String s) {
+      Set<Character> hasSeen = new HashSet<>();
+      if (node.data == '#' || node.data == '$') {
+        hasSeen.add(node.data);
+        return hasSeen;
+      }
+      for (Character c : node.children.keySet()) {
+        // System.out.println("Parsed Character : " + c);
+        Set<Character> res = findLCS(node.children.get(c), s + c);
+        hasSeen.addAll(res);
+        // if ((node.children.keySet().contains('#') && hasSeen == '$') ||
+        //   (node.children.keySet().contains('$') && hasSeen == '#')) {
+        //     System.out.println("Common Substring : " + s);
+        // }
+      }
+      if (hasSeen.contains('$') && hasSeen.contains('#') && !s.isEmpty() && s.length() > maxStr.length()) {
+          // System.out.println("Common Substring : " + s);
+          maxStr = s;
+      }
+      return hasSeen;
+    }
+
+    public void findLongestPalindrome(String text) {
+      root = new Node('&');
+      StringBuilder sb = new StringBuilder(text);
+      addText(text, '$');
+      addText(sb.reverse().toString(), '#');
+      maxStr = "";
+      findLCS(root, "");
+      System.out.println("Longest Palindrome : " + maxStr);
+    }
+
+
+
     public static void main(String[] args) {
         SuffixTree suffixTree = new SuffixTree();
         // suffixTree.addText("allen was going home super early but it is a cold day and all he could think of is cool wind allways and superrrr cool");
-        suffixTree.addText("Hello world!");
-        suffixTree.print(suffixTree.root, "");
-        suffixTree.match("world");
+        // suffixTree.addText("Hello world!");
+        // suffixTree.print(suffixTree.root, "");
+        // suffixTree.match("world");
+        suffixTree.findLongestCommonSubstring("ananamamapa", "xyananamapa");
+        suffixTree.findLongestPalindrome("forgeeksskeegfor");
     }
 }

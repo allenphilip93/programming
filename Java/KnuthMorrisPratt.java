@@ -32,6 +32,15 @@ public class KnuthMorrisPratt {
             }
         }
     }
+
+    public void matchWithWildcard(String text, String pattern) {
+
+    }
+
+    public void twoDimMatch(Character[][] charArray, String pattern) {
+
+    }
+
     public static void main(String[] args) {
         KnuthMorrisPratt matcher = new KnuthMorrisPratt();
         matcher.match("hallah world this is alla philip jalla!", "alla");
