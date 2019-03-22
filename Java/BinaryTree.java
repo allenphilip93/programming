@@ -14,6 +14,7 @@ public class BinaryTree<T extends Number & Comparable<? super T>> {
         Node right;
         int Ltag, Rtag;
         Node nextSibling;
+        int bf; // balance factor
         public Node(T data){
             this.data = data;
         }
@@ -108,7 +109,7 @@ public class BinaryTree<T extends Number & Comparable<? super T>> {
         List<Node> newNodes = new ArrayList<Node>();
         for (Node node : nodes) {
             if (node != null) {
-                System.out.print(node.data);
+                System.out.print(node.data + "(" + node.bf + ")");
                 newNodes.add(node.left);
                 newNodes.add(node.right);
             } else {
