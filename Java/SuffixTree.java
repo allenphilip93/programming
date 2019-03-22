@@ -96,9 +96,10 @@ public class SuffixTree {
         //     System.out.println("Common Substring : " + s);
         // }
       }
-      if (hasSeen.contains('$') && hasSeen.contains('#') && !s.isEmpty() && s.length() > maxStr.length()) {
-          // System.out.println("Common Substring : " + s);
-          maxStr = s;
+      if (hasSeen.contains('$') && hasSeen.contains('#') && !s.isEmpty()) {
+          System.out.println("Common Substring : " + s);
+          if (s.length() > maxStr.length())
+            maxStr = s;
       }
       return hasSeen;
     }
@@ -113,6 +114,30 @@ public class SuffixTree {
       System.out.println("Longest Palindrome : " + maxStr);
     }
 
+    public void findLongestRepeatedSubstring(String text) {
+      root = new Node('&');
+      addText(text, '$');
+      maxStr = "";
+      // print(root, "");
+      findLRS(root, "", 0);
+      System.out.println("Longest Repeated Substring : " + maxStr);
+    }
+
+    private int findLRS(Node node, String s, int depth) {
+      if (node.data == '$') {
+        return depth-1;
+      }
+      if (node.children.keySet().size() > 1 && !s.isEmpty() && node.data != '&') {
+          System.out.println("Common Substring : " + s);
+          if (s.length() > maxStr.length())
+            maxStr = s;
+      }
+      for (Character c : node.children.keySet()) {
+        int maxdepth = findLRS(node.children.get(c), s + c, depth+1);
+      }
+      return maxdepth;
+    }
+
 
 
     public static void main(String[] args) {
@@ -121,7 +146,10 @@ public class SuffixTree {
         // suffixTree.addText("Hello world!");
         // suffixTree.print(suffixTree.root, "");
         // suffixTree.match("world");
-        suffixTree.findLongestCommonSubstring("ananamamapa", "xyananamapa");
-        suffixTree.findLongestPalindrome("forgeeksskeegfor");
+        // suffixTree.findLongestCommonSubstring("ananamamapa", "xyananamapa");
+        // suffixTree.findLongestPalindrome("forgeeksskeegfor");
+        suffixTree.findLongestRepeatedSubstring("panamanamanamap");
+        // suffixTree.findLongestRepeatedSubstring("pallenhalle");
+        // suffixTree.findLongestRepeatedSubstring("pananx");
     }
 }
