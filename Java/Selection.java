@@ -162,7 +162,7 @@ public class Selection<T extends Number & Comparable<? super T>> extends Searchi
         if (s1 > e1) {
             return -1;
         }
-        if (checkIdx >= -1 && checkIdx <= arr2.length-1 
+        if (checkIdx >= -1 && checkIdx < arr2.length
             && (checkIdx == -1 || arr2[checkIdx] < arr1[guessIdx])
             && (checkIdx == arr2.length-1 || arr2[checkIdx+1] > arr1[guessIdx])) {
             return guessIdx;
