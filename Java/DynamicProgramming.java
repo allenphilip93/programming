@@ -440,13 +440,89 @@ public class DynamicProgramming {
         return array[i-1] + " " + findSubsets(i-1, j-array[i-1], pred, array);
     }
 
-    public void booleanParenthesization() {
-
+    public void booleanParenthesization(boolean[] bool, char[] op) {
+        // Let T[i,j] be the subproblem which gives the max num of ways 
+        // the subsequence [i,j] evaluates to 1
+        // Since we need to get all max iterations as well, we will evaluate
+        // F[i,j] the subproblem which gives the max num of ways 
+        // the subsequence [i,j] evaluates to 0
+        int[][] T = new int[bool.length][bool.length];
+        int[][] F = new int[bool.length][bool.length];
+        for (int i=0; i < bool.length; i++) {
+            T[i][i] = bool[i] ? 1 : 0;
+            F[i][i] = bool[i] ? 0 : 1;
+        }
+        for (int j=1; j < bool.length; j++) {
+            for (int i=j-1; i >= 0; i--) {
+                for (int k=i; k < j; k++) {
+                    // case based on symbol of k
+                    if (op[k] == '|') {
+                        T[i][j] = T[i][j] +
+                                    (T[i][k] + F[i][k]) * (T[k+1][j] + F[k+1][j]) - 
+                                    F[i][k] * F[k+1][j]; // Atleast one of the subproblems must be true
+                        F[i][j] = F[i][j] +
+                                    F[i][k] * F[k+1][j]; // Both subproblems must be false
+                    } else if (op[k] == '&') {
+                        T[i][j] = T[i][j] + T[i][k] * T[k+1][j]; // Both subproblems must be true
+                        F[i][j] = F[i][j] +
+                                    (T[i][k] + F[i][k]) * (T[k+1][j] + F[k+1][j]) - 
+                                    T[i][k] * T[k+1][j]; // Atleast one of the subproblems must be false
+                    } else {
+                        T[i][j] = T[i][j] +
+                                    T[i][k] * F[k+1][j] + F[i][k] * T[k+1][j]; // Both the subproblems must differ
+                        F[i][j] = F[i][j] +
+                                    T[i][k] * T[k+1][j] + F[i][k] * F[k+1][j]; // Both the subproblems must be same
+                    }
+                }
+            }
+        }
+        System.out.println("Max number of ways to put bracket such that expression evaluates to true : " 
+            + T[0][bool.length-1]);
+        System.out.println("Max number of ways to put bracket such that expression evaluates to false : " 
+            + F[0][bool.length-1]);
     }
 
-    public void editDistance() {
+    // Transform A -> B
+    public void editDistance(String A, String B) {
+        // Let N[i,j] be the min num of corrections needed to correct/match
+        // upto the ith character in A and jth character in B
+        int[][] N = new int[A.length()+1][B.length()+1];
 
+        // Fill d[][] in bottom up manner 
+        for (int i=0; i <= A.length(); i++) { 
+            for (int j=0; j <= B.length(); j++) { 
+                // If first string is empty, only option is to 
+                // insert all characters of second string 
+                if (i==0) 
+                    N[i][j] = j;  // Min. operations = j 
+       
+                // If second string is empty, only option is to 
+                // remove all characters of second string 
+                else if (j==0) 
+                    N[i][j] = i; // Min. operations = i 
+       
+                // If last characters are same, ignore last char 
+                // and recur for remaining string 
+                else if (A.charAt(i-1) == B.charAt(j-1)) 
+                    N[i][j] = N[i-1][j-1]; 
+       
+                // If the last character is different, consider all 
+                // possibilities and find the minimum 
+                else
+                    N[i][j] = 1 + min(N[i][j-1],  // Insert 
+                                      N[i-1][j],  // Remove 
+                                      N[i-1][j-1]); // Replace 
+            }
+        }
+        System.out.println("Mininum number of changes to convert " + A + " to " + B + " is " + N[A.length()][B.length()]);
     }
+
+    private int min(int x,int y,int z) 
+    { 
+        if (x <= y && x <= z) return x; 
+        if (y <= x && y <= z) return y; 
+        else return z; 
+    } 
 
     public void floydAlgorithm() {
 
@@ -503,5 +579,7 @@ public class DynamicProgramming {
         dp.buildingBridge(new int[] {8, 1, 4, 3, 5, 2, 6, 7}, new int[] {1, 2, 3, 4, 5, 6, 7, 8});
         dp.subsetSum(new int[] {1, 1, 5, 5}, 2);
         dp.partitionSubset(new int[] {3, 1, 5, 9, 12});
+        dp.booleanParenthesization(new boolean[] {true, true, false, true}, new char[] {'|', '&', '^'});
+        dp.editDistance("allen", "lens");
     }
 }
