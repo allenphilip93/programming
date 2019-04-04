@@ -528,35 +528,264 @@ public class DynamicProgramming {
 
     }
 
-    public void optimalGameStrategy() {
+    // Consider a row of n coins of values v1 . . . vn, where n is even. We play a game against an opponent 
+    // by alternating turns. In each turn, a player selects either the first or last coin from the row, 
+    // removes it from the row permanently, and receives the value of the coin. Determine the maximum possible 
+    // amount of money we can definitely win if we move first.
+    // Ofcourse num of coins must be even
+    public void optimalGameStrategy(int[] coins) {
+        // M[i][j] - maximum money we can get picking from ith coin to the jth coin
+        int[][] M = new int[coins.length][coins.length];
+        for (int i=0; i < coins.length; i++) {
+            M[i][i] = coins[i];
+            if (i < coins.length-1)
+                M[i][i+1] = Math.max(coins[i], coins[i+1]);
+        }
+        for (int i=2; i < coins.length; i++) {
+            for (int j=0; (j + i) < coins.length; j++) {
+                int x = j;
+                int y = j + i;
+                M[x][y] = Math.max(
+                    coins[x] + Math.min(M[x+2][y], M[x+1][y-1]),  // key point to why min is what we want to find the max money
+                    coins[y] + Math.min(M[x][y-2], M[x+1][y-1])   // we can DEFINITELY win, given the opponent plays smart too!
+                );
+                // System.out.format("M[%d][%d] = %d\n", x, y, M[x][y]);
+            }
+        }
+        System.out.println("The max sum possible with the given coin sequence is " + M[0][coins.length-1]);
+    }
+
+    // Given a “2 x n” board and tiles of size “2 x 1”, count the number of ways to tile the given board using the 2 x 1 tiles. 
+    // A tile can either be placed horizontally i.e., as a 1 x 2 tile or vertically i.e., as 2 x 1 tile.
+    public void tilingProblem(int n) {
+        // Let M[i] be the max num of tiles with i spaces available
+        int[] M = new int[n+1];
+        M[0] = 0;
+        M[1] = 1;
+        M[2] = 2;
+        for (int i=3; i <=n; i++) {
+            M[i] = M[i-1] + M[i-2];
+        }
+        // How cool, basically its the fibonnaci! Numbers eh!
+        System.out.println("Max number of tile patterns possible with " + n + " spaces is " + M[n]);
+    }
+
+    public void longestPalindromeSubsequence(String s) {
+        // P[i][j] - length of largest palindrome in the substring s[i:j]
+        int[][] P = new int[s.length()][s.length()];
+        for (int i=0; i < s.length(); i++) {
+            P[i][i] = 1;
+        }
+        int max = 0;
+        for (int i=1; i < s.length(); i++) {
+            for (int j=0; (j+i) < s.length(); j++) {
+                int x = j;
+                int y = i+j;
+                if (s.charAt(x) == s.charAt(y)) {
+                    P[x][y] = 2 + P[x+1][y-1];
+                } else {
+                    P[x][y] = Math.max(P[x+1][y], P[x][y-1]); // we skip one of the ending strings and try again
+                }
+                max = Math.max(max, P[x][y]);
+            }
+        }
+        System.out.println("Length of the longest palindrome subsequence : " + max);
+    }
+
+    public void longestPalindromeSubstring(String s) {
+        // P[i][j] - length of largest palindrome in the substring s[i:j] INCLUDING i and j
+        int[][] P = new int[s.length()][s.length()];
+        for (int i=0; i < s.length(); i++) {
+            P[i][i] = 1;
+        }
+        int max = 0;
+        String maxStr = "";
+        for (int i=1; i < s.length(); i++) {
+            for (int j=0; (j+i) < s.length(); j++) {
+                int x = j;
+                int y = i+j;
+                if (s.charAt(x) == s.charAt(y)) {
+                    P[x][y] = 2 + P[x+1][y-1];
+                }
+                if (P[x][y] > max)
+                    maxStr = s.substring(x, y+1);
+                max = Math.max(max, P[x][y]);
+                // System.out.format("P[%d][%d] = %d\n", x, y, P[x][y]);
+            }
+        }
+        System.out.println("Length of the longest palindrome substring : " + max);
+        System.out.println("Longest palindrome : " + maxStr);
+    }
+
+    // Given two strings, find the number of times the second string occurs in the first string, whether continuous or discontinuous.
+    public void countStringAppearences(String s, String p) {
+        // N[i][j] = Number of times pattern p[0:j] appears in s[0:i]
+        int[][] N = new int[s.length()+1][p.length()];
+        for (int i=1; i <= s.length(); i++) {
+            if (s.charAt(i-1) == p.charAt(0)) {
+                N[i][0] = 1 + N[i-1][0];
+            } else {
+                N[i][0] = N[i-1][0];
+            }
+        }
+        for (int j=1; j < p.length(); j++) {
+            for (int i=1; i <= s.length(); i++) {
+                if (s.charAt(i-1) == p.charAt(j)) {
+                    N[i][j] = N[i-1][j] + N[i-1][j-1];
+                } else {
+                    N[i][j] = N[i-1][j];
+                }
+                // System.out.format("N[%d][%d] = %d\n", i, j, N[i][j]);                
+            }
+        }
+        System.out.println("Max num of appearences of " + p + " in " + s + " : " + N[s.length()][p.length()-1]);
+    }
+
+    // A table composed of N x M cells, each having a certain quantity of apples, is given. 
+    // You start from the upper-left corner. At each step you can go down or right one cell. 
+    // Find the maximum number of apples you can collect.
+    public void maximizeApples(int[][] matrix) {
+        // M[i][j] - be the maximum apples we can collect at pos(i,j)
+        int[][] M = new int[matrix.length][matrix[0].length];
+        M[0][0] = matrix[0][0];
+        for (int i=1; i <= (matrix.length + matrix[0].length); i++) {
+            for (int j=0; j <= i; j++) {
+                int x = j;
+                int y = i - j;
+                if (x >= matrix.length || y >= matrix[0].length)
+                    continue;
+                if (x == 0) {
+                    M[x][y] = M[x][y-1] + matrix[x][y];
+                } else if (y == 0) {
+                    M[x][y] = M[x-1][y] + matrix[x][y];
+                } else {
+                    M[x][y] = Math.max(M[x-1][y], M[x][y-1]) + matrix[x][y];
+                }
+                // System.out.format("M[%d][%d] = %d\n", x, y, M[x][y]);                
+            }
+        }
+        System.out.println("Max num of apples that can be collected : " + M[matrix.length-1][matrix[0].length-1]);
+    }
+
+    // A table composed of N x M cells, each having a certain quantity of apples, is given. 
+    // You start from the upper-left corner. At each step you can go down or right or diagonal one cell. 
+    // Find the maximum number of apples you can collect.
+    public void maximizeApplesWithDiag(int[][] matrix) {
+        // M[i][j] - be the maximum apples we can collect at pos(i,j)
+        int[][] M = new int[matrix.length][matrix[0].length];
+        M[0][0] = matrix[0][0];
+        for (int i=1; i <= (matrix.length + matrix[0].length); i++) {
+            for (int j=0; j <= i; j++) {
+                int x = j;
+                int y = i - j;
+                if (x >= matrix.length || y >= matrix[0].length)
+                    continue;
+                if (x == 0) {
+                    M[x][y] = M[x][y-1] + matrix[x][y];
+                } else if (y == 0) {
+                    M[x][y] = M[x-1][y] + matrix[x][y];
+                } else {
+                    M[x][y] = matrix[x][y] + Math.max(M[x-1][y], Math.max(M[x][y-1], M[x-1][y-1]));
+                }
+                // System.out.format("M[%d][%d] = %d\n", x, y, M[x][y]);                
+            }
+        }
+        System.out.println("Max num of apples that can be collected with diagonal moves : " + M[matrix.length-1][matrix[0].length-1]);
+    }
+
+    public void maxSizeSquareSubMatrix(int[][] matrix) {
+        // A[i,j] -> Size of square matrix with bottom right edge at (i,j)
+        int[][] A = new int [matrix.length][matrix[0].length];
+        int max = 0;
+        for (int i=0; i <= (matrix.length + matrix[0].length); i++) {
+            for (int j=0; j <= i; j++) {
+                int x = j;
+                int y = i-j;
+                if (x >= matrix.length || y >= matrix[0].length)
+                    continue;
+                if (x == 0 || y ==0) {
+                    A[x][y] = matrix[x][y];
+                } else if (matrix[x][y] == 1) {
+                    A[x][y] = 1 + Math.min(A[x-1][y], Math.min(A[x-1][y-1], A[x][y-1]));
+                }
+                // System.out.format("A[%d][%d] = %d\n", x, y, A[x][y]);                
+                max = Math.max(max, A[x][y]);
+            }
+        }
+        System.out.println("Max size of the square submatrix of 1s : " + max);
+    }
+
+    public void maxSizeSubMatrix(int[][] matrix) {
+        // L[i,j] - max length rectangle with bottom right edge at (i,j)
+        // B[i,j] - max breadth rectangle with bottom right edge at (i,j)
+        int[][] L = new int[matrix.length][matrix[0].length];
+        int[][] B = new int[matrix.length][matrix[0].length];
+        L[0][0] = B[0][0] = matrix[0][0];
+        int max = 0;
+        for (int i=1; i <= (matrix.length + matrix[0].length); i++) {
+            for (int j=0; j <= i; j++) {
+                int x = j;
+                int y = i-j;
+                if (x >= matrix.length || y >= matrix[0].length)
+                    continue;
+                if (matrix[x][y] == 1) {
+                    if (x == 0) {
+                        L[x][y] = matrix[x][y];
+                        B[x][y] = matrix[x][y] + B[x][y-1];
+                    } else if (y==0) {
+                        L[x][y] = matrix[x][y] + L[x-1][y];
+                        B[x][y] = matrix[x][y];
+                    } else {
+                        L[x][y] = matrix[x][y] + L[x-1][y];
+                        B[x][y] = matrix[x][y] + B[x][y-1];
+                    }
+                }
+                // System.out.format("L[%d][%d] = %d\n", x, y, L[x][y]);
+                // System.out.format("B[%d][%d] = %d\n", x, y, B[x][y]);
+                // System.out.println("--------------------------------");
+                max = Math.max(max, L[x][y] * B[x][y]);
+            }
+        }
+        // Note - this approach is wrong, use the other one only!
+        System.out.println("Max size of the submatrix of 1s : " + max);
+        // Another cool way to solve this is to transform the matrix to represent L,
+        // then we go through every row and use the max rectangle area using stacks
+    }
+
+    public void maxSumSubMatrix(int[][] matrix) {
 
     }
 
-    public void tilingProblem() {
+    // Alice is a kindergarten teacher. She wants to give some candies to the children in her class.  
+    // All the children sit in a line and each of them has a rating score according to his or her 
+    // performance in the class.  Alice wants to give at least 1 candy to each child. If two children 
+    // sit next to each other, then the one with the higher rating must get more candies. Alice wants 
+    // to minimize the total number of candies she must buy.
+    // For example, assume her students' ratings are [4, 6, 4, 5, 6, 2]. She gives the students candy 
+    // in the following minimal amounts: [1, 2, 1, 2, 3, 1]. She must buy a minimum of 10 candies.
+    public void candyProblem() {
 
     }
 
-    public void longestPalindromeSubsequence() {
-
+    public void optimalNumJumps(int[] jumps) {
+        // M[i] - Min num of jumps needed to reach end from ith pos
+        int[] M = new int[jumps.length];
+        M[jumps.length-1] = 0;
+        for (int i=jumps.length-2; i >=0; i--) {
+            M[i] = (int) Double.POSITIVE_INFINITY;
+            int dist = jumps.length-1-i;
+            System.out.println(jumps[i]);
+            for (int j=jumps[i]; j > 0; j--) {
+                if (j <= dist) {
+                    M[i] = Math.min(1 + M[i+j], M[i]);
+                }
+            }
+            // System.out.format("M[%d] = %d\n", i, M[i]);
+        }
+        System.out.println("Optimal num of jumps to reach the end : " + M[0]);
     }
 
-    public void countStringAppearences() {
-
-    }
-
-    public void maximizeApples() {
-
-    }
-
-    public void maxSizeSubMatrix() {
-
-    }
-
-    public void maxSumSubMatrix() {
-
-    }
-
-    public void optimalNumJumps() {
+    public void giftDistribution() {
 
     }
 
@@ -581,5 +810,28 @@ public class DynamicProgramming {
         dp.partitionSubset(new int[] {3, 1, 5, 9, 12});
         dp.booleanParenthesization(new boolean[] {true, true, false, true}, new char[] {'|', '&', '^'});
         dp.editDistance("allen", "lens");
+        dp.optimalGameStrategy(new int[] {1, 2, 3, 4, 5, 6});
+        dp.tilingProblem(4);
+        dp.longestPalindromeSubstring("forgeeksskeegfor");
+        dp.longestPalindromeSubsequence("BBABCBCAB");
+        dp.longestPalindromeSubsequence("GEEKSFORGEEKS");
+        dp.countStringAppearences("GeeksforGeeks", "Gks");
+        dp.maximizeApples(new int[][] {{1, 3, 2, 4},
+                                       {3, 1, 2, 2},
+                                       {2, 1, 3, 2}});
+        dp.maximizeApplesWithDiag(new int[][] {{1, 3, 2, 4},
+                                               {3, 1, 2, 2},
+                                               {2, 1, 3, 2}});
+        dp.maxSizeSquareSubMatrix(new int[][] {{1, 0, 1, 1, 0},
+                                               {0, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1},
+                                               {0, 1, 1, 1, 1},
+                                               {1, 1, 0, 0, 1}});
+        dp.maxSizeSubMatrix(new int[][] {{1, 0, 1, 1, 0},
+                                         {0, 1, 1, 1, 1},
+                                         {1, 1, 1, 1, 1},
+                                         {0, 1, 1, 1, 1},
+                                         {1, 1, 0, 0, 1}});
+        dp.optimalNumJumps(new int[] {2, 3, 1, 1, 4});
     }
 }
