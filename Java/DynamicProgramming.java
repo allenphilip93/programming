@@ -79,7 +79,7 @@ public class DynamicProgramming {
     }
 
     // Find the maximum value contiguous subsequence
-    public void maxValueContSubsequence(int[] array) {
+    public int maxValueContSubsequence(int[] array) {
         int max_so_far = array[0];
         int max_ending_here = array[0];
         int start = 0, end = 0;
@@ -97,6 +97,7 @@ public class DynamicProgramming {
         }
         System.out.println("Max Value : "+ max_so_far);
         System.out.println("Longest Subsequence for max sum : (" + start + ", " + end + ")");
+        return max_so_far;
     }
 
     public void DPProblem1(int n) {
@@ -752,8 +753,47 @@ public class DynamicProgramming {
         // then we go through every row and use the max rectangle area using stacks
     }
 
-    public void maxSumSubMatrix(int[][] matrix) {
+    // Assume matrix is of dim N+1 X N+1 with the left most and top most borders as 0s
+    public void maxSumSubMatrix(int[][] matrix, int N) {
+        // Ideally speaking we might have to build n^4 subproblems and solve for the 
+        // left top corner and right bottom corner, but this can be solved faster!
+        
+        // Start out by cumulating the column sums
+        for (int i=1; i <= N; i++) {
+            for (int j=1; j <= N; j++) {
+                matrix[i][j] = matrix[i][j] + matrix[i-1][j];
+            }
+        }
 
+        int max_so_far = 0;
+
+        // We can reduce to n^2 subproblems but considering the top of the submatrix and the 
+        // bottom of the submatrix, which bound the submatrix
+        for (int top=1; top <= N; top++) {
+            for (int bottom=top; bottom <= N; bottom++) {
+                // Now we build the actual submatrix which has been squeezed to 1D
+                // for all submatrices bound by top and bottom and apply kandane's
+                // algo to find the longest increasing subsequence
+                int[] sum = new int[N+1];
+                for (int k=1; k <= N; k++) {
+                    sum[k] = matrix[bottom][k] - matrix[top-1][k];
+                }
+
+                // Apply kandane and keep track of max
+                int max_ending_here = 0, start = 1;
+                for (int k = 1; k <= N; k++) {
+                    if (max_ending_here + sum[k] < sum[k])
+                        start = k;
+                    max_ending_here = Math.max(max_ending_here + sum[k], sum[k]);
+                    if (max_ending_here >= max_so_far) {
+                        System.out.format("Last Max Submatrix : (%d, %d) to (%d, %d)\n", top, start, bottom, k);
+                    }
+                    max_so_far = Math.max(max_ending_here, max_so_far);
+                }
+            }
+        }
+
+        System.out.println("Max sum among all possible submatrices : " + max_so_far);
     }
 
     // Alice is a kindergarten teacher. She wants to give some candies to the children in her class.  
@@ -774,7 +814,6 @@ public class DynamicProgramming {
         for (int i=jumps.length-2; i >=0; i--) {
             M[i] = (int) Double.POSITIVE_INFINITY;
             int dist = jumps.length-1-i;
-            System.out.println(jumps[i]);
             for (int j=jumps[i]; j > 0; j--) {
                 if (j <= dist) {
                     M[i] = Math.min(1 + M[i+j], M[i]);
@@ -783,10 +822,6 @@ public class DynamicProgramming {
             // System.out.format("M[%d] = %d\n", i, M[i]);
         }
         System.out.println("Optimal num of jumps to reach the end : " + M[0]);
-    }
-
-    public void giftDistribution() {
-
     }
 
     public static void main(String[] args) {
@@ -833,5 +868,10 @@ public class DynamicProgramming {
                                          {0, 1, 1, 1, 1},
                                          {1, 1, 0, 0, 1}});
         dp.optimalNumJumps(new int[] {2, 3, 1, 1, 4});
+        dp.maxSumSubMatrix(new int[][] {{0, 0, 0, 0, 0},
+                                        {0, 1, -3, 2, -4},
+                                        {0, -3, 1, -2, 2},
+                                        {0, -2, 1, 3, -2},
+                                        {0, 4, 2, -3, -3}}, 4);
     }
 }
